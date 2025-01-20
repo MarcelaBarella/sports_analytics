@@ -1,0 +1,27 @@
+# 🛑 Ignore virtual environment files
+venv/
+.env
+*.env
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 🛑 Ignore scraping generated files
+scraped_data/
+*.csv
+*.json
+*.xlsx
+*.parquet
+*.pkl
+
+# 🛑 Ignore VSCode configs
+.vscode/
+
+# 🛑 Ignore macOS file system
+.DS_Store
+
+# 🛑 Ignore automatic generated dependencies
+pip-log.txt
+pip-delete-this-directory.txt
