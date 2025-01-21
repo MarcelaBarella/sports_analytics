@@ -279,3 +279,43 @@ def top_scorers_seasons():
     winners['Season'] = winners['Season'].replace('', np.nan).ffill()
 
     return winners
+
+def goals_per_season():
+    # page link of the site were data will be extracted
+    url = 'https://www.worldfootball.net/stats/eng-premier-league/1/'
+    # list to store the headers
+    headers = []
+    # makes a get request that returns the html
+    page = requests.get(url)
+
+    # used to clean and sort throught the html content to get the needed data
+    soup = BeautifulSoup(page.text, 'html.parser')
+
+    # find the content in this html tag, using class_ cause class is a key world
+    table = soup.find('table', class_='standard_tabelle')
+
+    # finds all html tags with th header
+    for th in table.find_all('th'):
+        # gets the text content
+        title = th.text
+        # appends the title to the headers
+        headers.append(title)
+
+    #creates dataframes with the headers
+    goals_per_season = pd.DataFrame(columns=headers)
+
+    # finds all the html tags with tr
+    for tr in table.find_all('tr')[1:]:
+        row_data = tr.find_all('td')
+        row = [td.text.strip() for td in row_data]
+        lenght = len(goals_per_season)
+
+        # gets them by row and saves to the league table dataframe
+        goals_per_season.loc[lenght] = row
+
+        goals_per_season.drop(goals_per_season.index[-1], inplace=True)
+
+        goals_per_season = goals_per_season.drop(['#'], axis=1)
+        goals_per_season.rename(columns={ 'goals': 'Goals', 'Ø goals': 'Average Goals' }, inplace=True)
+
+        return goals_per_season
