@@ -210,3 +210,40 @@ def all_time_table():
     all_time_table.Team = all_time_table.Team.str.replace('\n', '')
 
     return all_time_table
+
+def all_time_winner_club():
+    # page link of the site were data will be extracted
+    url = 'https://www.worldfootball.net/winner/eng-premier-league/'
+    # list to store the headers
+    headers = []
+    # makes a get request that returns the html
+    page = requests.get(url)
+
+    # used to clean and sort throught the html content to get the needed data
+    soup = BeautifulSoup(page.text, 'html.parser')
+
+    # find the content in this html tag, using class_ cause class is a key world
+    table = soup.find('table', class_='standard_tabelle')
+
+    # finds all html tags with th header
+    for th in table.find_all('th'):
+        # gets the text content
+        title = th.text
+        # appends the title to the headers
+        headers.append(title)
+
+    #creates dataframes with the headers
+    winners = pd.DataFrame(columns=headers)
+
+    # finds all the html tags with tr
+    for tr in table.find_all('tr')[1:]:
+        row_data = tr.find_all('td')
+        row = [td.text.strip() for td in row_data]
+        lenght = len(winners)
+        # gets them by row and saves to the league table dataframe
+        winners.loc[lenght] = row
+
+    winners = winners.drop([''], axis=1)
+    winners['Year'] = winners['Year'].str.replace('\n', '')
+
+    return winners
