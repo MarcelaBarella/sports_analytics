@@ -52,7 +52,7 @@ def top_scorers():
     table = soup.find('table', class_='ssrcss-jsg8ev-TableWrapper e1icz102')
 
     # finds all html tags with th header
-    for th in table.find_all('th'): 
+    for th in table.find_all('th'):
         # gets the text content
         title = th.text
         # appends the title to the headers
@@ -99,7 +99,7 @@ def detail_top_scorer():
     table = soup.find('table', class_='standard_tabelle')
 
     # finds all html tags with th header
-    for th in table.find_all('th'): 
+    for th in table.find_all('th'):
         # gets the text content
         title = th.text
         # appends the title to the headers
@@ -130,7 +130,54 @@ def detail_top_scorer():
 
     detail_top_scorer = detail_top_scorer.drop(['#'], axis=1)
 
-    print(detail_top_scorer)
     return detail_top_scorer
 
-detail_top_scorer()
+def player_table():
+    urls = [f'https://www.worldfootball.net/players_list/eng-premier-league-2023-2024/nach-name/{id:d}' for id in (range(1, 12))]
+    # list to store dataframe columns names
+    df_columns = ['Player', '', 'Team', 'born', 'Height', 'Position']
+
+    df = pd.DataFrame(columns=df_columns)
+
+    def player(ev):
+        # page link of the site were data will be extracted
+        url = ev
+        # list to store the headers
+        headers = []
+        #makes a get request and returns the html
+        page = requests.get(url)
+
+        # used to clean and sort throught the html content to get the needed data
+        soup = BeautifulSoup(page.text, 'html.parser')
+
+        # find the content in this html tag, using class_ cause class is a key world
+        table = soup.find('table', class_='standard_tabelle')
+
+        # finds all html tags with th header
+        for th in table.find_all('th'):
+            # gets the text content
+            title = th.text
+            # appends the title to the headers
+            headers.append(title)
+
+        #creates dataframes with the headers
+        players = pd.DataFrame(columns=headers)
+
+        # finds all the html tags with tr
+        for tr in table.find_all('tr')[1:]:
+            row_data = tr.find_all('td')
+            row = [td.text for td in row_data]
+            lenght = len(players)
+            # gets them by row and saves to the league table dataframe
+            players.loc[lenght] = row
+
+        print(players)
+        return players
+
+    for url in urls:
+        player = player(url)
+        df = pd.concat([df, player], axis=0).reset_index(drop=True)
+
+    df = df.drop([''], axis=1)
+
+    return df
