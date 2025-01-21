@@ -29,7 +29,7 @@ def league_table():
     # finds all the html tags with tr
     for tr in table.find_all('tr')[1:]:
         row_data = tr.find_all('td')
-        row = [td.text for td in row_data]
+        row = [td.text.strip() for td in row_data]
         lenght = len(league_table)
         # gets them by row and saves to the league table dataframe
         league_table.loc[lenght] = row
@@ -64,7 +64,7 @@ def top_scorers():
     # finds all the html tags with tr
     for tr in table.find_all('tr')[1:]:
         row_data = tr.find_all('td')
-        row = [td.text for td in row_data]
+        row = [td.text.strip() for td in row_data]
         lenght = len(top_scorers)
         # gets them by row and saves to the league table dataframe
         top_scorers.loc[lenght] = row
@@ -111,7 +111,7 @@ def detail_top_scorer():
     # finds all the html tags with tr
     for tr in table.find_all('tr')[1:]:
         row_data = tr.find_all('td')
-        row = [td.text for td in row_data]
+        row = [td.text.strip() for td in row_data]
         lenght = len(detail_top_scorer)
         # gets them by row and saves to the league table dataframe
         detail_top_scorer.loc[lenght] = row
@@ -166,12 +166,11 @@ def player_table():
         # finds all the html tags with tr
         for tr in table.find_all('tr')[1:]:
             row_data = tr.find_all('td')
-            row = [td.text for td in row_data]
+            row = [td.text.strip() for td in row_data]
             lenght = len(players)
             # gets them by row and saves to the league table dataframe
             players.loc[lenght] = row
 
-        print(players)
         return players
 
     for url in urls:
@@ -181,3 +180,33 @@ def player_table():
     df = df.drop([''], axis=1)
 
     return df
+
+def all_time_table():
+    # page link of the site were data will be extracted
+    url = 'https://www.worldfootball.net/alltime_table/eng-premier-league/pl-only/'
+    # list to store the headers
+    headers = ['pos', '#', 'Team', 'Matches', 'wins', 'Draws' 'Losses', 'Goals', 'Dif', 'Points']
+    # makes a get request that returns the html
+    page = requests.get(url)
+
+    # used to clean and sort throught the html content to get the needed data
+    soup = BeautifulSoup(page.text, 'html.parser')
+
+    # find the content in this html tag, using class_ cause class is a key world
+    table = soup.find('table', class_='standard_tabelle')
+
+    # find the content in this html tag, using class_ cause class is a key world
+    all_time_table = pd.DataFrame(columns=headers)
+
+    # finds all the html tags with tr
+    for tr in table.find_all('tr')[1:]:
+        row_data = tr.find_all('td')
+        row = [td.text.strip() for td in row_data]
+
+        if len(row) == len(headers):
+            all_time_table.loc[len(all_time_table)] = row
+
+    all_time_table = all_time_table.drop(['#'], axis=1)
+    all_time_table.Team = all_time_table.Team.str.replace('\n', '')
+
+    return all_time_table
